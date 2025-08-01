@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Last War Calculators", layout="wide")
+st.set_page_config(page_title="Last War Calculators", layout="centered")
 
 # Language bar on top
 lang_options = {"English": "en", "Tiếng Việt": "vi", "繁體中文": "zh"}
@@ -44,6 +44,7 @@ text = {
 
 tab1, tab2 = st.tabs([text["mega_title"][lang], text["t10_title"][lang]])
 
+# --- Mega Express Train ---
 with tab1:
     st.title(text["mega_title"][lang])
     st.markdown(text["train_intro"][lang])
@@ -67,31 +68,32 @@ with tab1:
         else:
             st.markdown(f"**{i}. Cabin {cabin} — EV = {ev:.2f}**")
 
+# --- T10 Grind ---
 with tab2:
     st.title(text["t10_title"][lang])
     st.markdown(text["t10_intro"][lang])
 
-    # Tech tree input
     tech_tree = {
-        "Advanced Protection": 10,
-        "HP Boost": 10,
-        "Attack Boost": 10,
-        "Defense Boost": 10
+        "Advanced Protection Current Level": 10,
+        "HP Boost Current Level": 10,
+        "Attack Boost Current Level": 10,
+        "Defense Boost Current Level": 10
     }
 
     levels = {}
     for tech, max_level in tech_tree.items():
+        def format_option(x, max_level=max_level):
+            return "Max" if x == max_level else x
         levels[tech] = st.selectbox(f"{tech}", list(range(0, max_level + 1)), index=0,
-                                    format_func=lambda x: "Max" if x == max_level else x, key=tech)
+                                    format_func=format_option, key=tech)
 
     st.markdown(text["unit_x_info"][lang])
 
-    # Cost table
     research_data = {
-        "Advanced Protection": ([31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [91, 158, 158, 221, 221, 287, 287, 403, 403, 522]),
-        "HP Boost": ([31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [91, 158, 158, 221, 221, 287, 287, 403, 403, 522]),
-        "Attack Boost": ([31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [91, 158, 158, 221, 221, 287, 287, 403, 403, 522]),
-        "Defense Boost": ([31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [31, 53, 53, 74, 74, 96, 96, 134, 134, 175], [91, 158, 158, 221, 221, 287, 287, 403, 403, 522]),
+        "Advanced Protection Current Level": ([31,53,53,74,74,96,96,134,134,175],)*3,
+        "HP Boost Current Level": ([31,53,53,74,74,96,96,134,134,175],)*3,
+        "Attack Boost Current Level": ([31,53,53,74,74,96,96,134,134,175],)*3,
+        "Defense Boost Current Level": ([31,53,53,74,74,96,96,134,134,175],)*3,
         "Unit X": ([187], [187], [560])
     }
 
@@ -100,30 +102,26 @@ with tab2:
 
     for tech, (iron_list, bread_list, gold_list) in research_data.items():
         if tech == "Unit X":
-            include_unit_x = all(levels[t] == 10 for t in tech_tree)
-            if include_unit_x:
+            if all(levels[t] == 10 for t in tech_tree):
                 total_iron += iron_list[0]
                 total_bread += bread_list[0]
                 total_gold += gold_list[0]
-                rows.append({
-                    "Item": "Unit X",
-                    "Iron": f"{iron_list[0]/1000:.1f}M",
-                    "Bread": f"{bread_list[0]/1000:.1f}M",
-                    "Gold": f"{gold_list[0]/1000:.1f}M"
-                })
+                rows.append({"Item": "Unit X", "Iron": f"{iron_list[0]/1000:.1f}M", "Bread": f"{bread_list[0]/1000:.1f}M", "Gold": f"{gold_list[0]/1000:.1f}M"})
             continue
-        lvl = levels[tech]
-        for i in range(lvl, 10):
+
+        current_lvl = levels[tech]
+        for i in range(current_lvl, 10):
             total_iron += iron_list[i]
             total_bread += bread_list[i]
             total_gold += gold_list[i]
             rows.append({
-                "Item": f"{tech} {i+1}",
+                "Item": f"{tech.replace(' Current Level', '')} {i+1}",
                 "Iron": f"{iron_list[i]/1000:.1f}M",
                 "Bread": f"{bread_list[i]/1000:.1f}M",
                 "Gold": f"{gold_list[i]/1000:.1f}M"
             })
 
+    # Total cost above summary
     st.subheader(text["total_cost"][lang])
     st.write(f"**Iron:** {total_iron/1000:.1f}M")
     st.write(f"**Bread:** {total_bread/1000:.1f}M")
