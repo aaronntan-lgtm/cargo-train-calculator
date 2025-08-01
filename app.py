@@ -1,16 +1,9 @@
+
 import streamlit as st
+import pandas as pd
 
-st.set_page_config(page_title="Best Cargo Train Calculator")
-
-# Custom CSS for green dropdown styling
-st.markdown("""
-    <style>
-    div[data-baseweb="select"] > div {
-        border-color: #28a745 !important;
-        box-shadow: 0 0 0 1px #28a745 !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# Set page config
+st.set_page_config(page_title="Last War Tools", layout="wide")
 
 # Language options
 languages = {
@@ -19,87 +12,64 @@ languages = {
     "繁體中文": "zh"
 }
 
-lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
+lang_choice = st.sidebar.selectbox("🌐 Language", list(languages.keys()))
 lang = languages[lang_choice]
 
+# Text dictionary
 text = {
-    "train_title": {
+    "mega_train_title": {
         "en": "🚂 Mega Express Train",
-        "vi": "🚂 Tàu siêu tốc Mega Express",
-        "zh": "🚂 超级快车 Mega Express"
-    },
-    "t10_title": {
-        "en": "T10 Grind",
-        "vi": "Mài T10",
-        "zh": "T10 磨练"
+        "vi": "🚂 Tàu tốc hành Mega",
+        "zh": "🚂 巨無霸特快車"
     },
     "train_intro": {
-        "en": "Select your best cabin based on current queue sizes. This assumes that Cabin D is the best, followed by Cabin A, and Cabins B & C have equal value.",
-        "vi": "Chọn khoang tốt nhất dựa trên số người xếp hàng hiện tại. Khoang D có giá trị cao nhất, tiếp theo là A, còn B và C có giá trị bằng nhau.",
-        "zh": "根据目前排队人数选择最佳车厢。车厢 D 为最高价值，其次为 A，B 和 C 价值相同。"
-    },
-    "ev_description": {
-        "en": "**What is EV?** Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice.",
-        "vi": "**EV là gì?** Giá trị kỳ vọng (EV) ước tính mức lợi trung bình của bạn theo thời gian. EV càng cao thì lựa chọn càng tốt về lâu dài.",
-        "zh": "**什么是 EV？** 期望值 (EV) 表示你长期平均能获得的收益。EV 越高，长期表现越好。"
+        "en": "Choose the best cabin based on queue sizes.",
+        "vi": "Chọn khoang tốt nhất dựa trên hàng chờ.",
+        "zh": "根據排隊人數選擇最佳車廂。"
     },
     "input_header": {
-        "en": "📥 Input Queue Sizes for Each Cabin",
-        "vi": "📥 Nhập số người đang xếp hàng tại mỗi khoang",
-        "zh": "📥 输入每个车厢的排队人数"
+        "en": "📥 Enter Queue Sizes",
+        "vi": "📥 Nhập số người xếp hàng",
+        "zh": "📥 輸入排隊人數"
     },
     "input_label": {
-        "en": "Cabin {name} (Enter the number of passengers in the queue here)",
-        "vi": "Khoang {name} (Nhập số người xếp hàng tại đây)",
-        "zh": "车厢 {name}（请输入排队人数）"
+        "en": "Cabin {name}",
+        "vi": "Khoang {name}",
+        "zh": "車廂 {name}"
     },
     "ranking_header": {
         "en": "📊 Cabin Rankings by EV",
-        "vi": "📊 Xếp hạng các khoang theo EV",
-        "zh": "📊 根据 EV 排名的车厢"
+        "vi": "📊 Xếp hạng khoang theo EV",
+        "zh": "📊 根據 EV 排名的車廂"
     },
-    "t10_header": {
-        "en": "Select Current Research Levels",
-        "vi": "Chọn cấp độ nghiên cứu hiện tại",
-        "zh": "选择当前研究等级"
+    "ev_desc": {
+        "en": "What is EV? Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice.",
+        "vi": "EV là gì? Giá trị kỳ vọng (EV) ước tính mức lợi trung bình. EV càng cao thì lựa chọn càng tốt.",
+        "zh": "什麼是 EV？期望值 (EV) 表示你平均獲得的收益，越高越好。"
     },
-    "resource_total_header": {
-        "en": "### Total Research Cost Remaining:",
-        "vi": "### Tổng chi phí nghiên cứu còn lại:",
-        "zh": "### 剩余研究总成本："
+    "t10_title": {
+        "en": "🛡️ T10 Grind",
+        "vi": "🛡️ Cày T10",
+        "zh": "🛡️ T10 辛勞"
     },
-    "resource_labels": {
-        "en": ["Iron", "Bread", "Gold"],
-        "vi": ["Sắt", "Bánh mì", "Vàng"],
-        "zh": ["铁", "面包", "金币"]
+    "t10_intro": {
+        "en": "Select your current research levels to calculate remaining resources needed to unlock Unit X.",
+        "vi": "Chọn cấp nghiên cứu hiện tại để tính toán tài nguyên cần thiết.",
+        "zh": "選擇目前研究等級來計算剩餘資源。"
     },
-    "cabins_no_input": {
-        "en": "(Please select number of players in the queue)",
-        "vi": "(Vui lòng chọn số người trong hàng đợi)",
-        "zh": "(请选择排队人数)"
+    "resources_needed": {
+        "en": "📦 Resources needed for T10",
+        "vi": "📦 Tài nguyên cần thiết cho T10",
+        "zh": "📦 T10 所需資源"
     }
 }
 
-def format_number(num):
-    """Format number with M or G suffix"""
-    if num >= 1000:
-        return f"{num/1000:.1f}G"
-    elif num >= 1:
-        return f"{num:.1f}M"
-    else:
-        return str(num)
+# Tabs
+tab1, tab2 = st.tabs([text["mega_train_title"][lang], text["t10_title"][lang]])
 
-# Main app tabs
-tabs = [
-    text["train_title"][lang],
-    text["t10_title"][lang]
-]
-
-selected_tab = st.tabs(tabs)
-
-with selected_tab[0]:
-    # Mega Express Train Calculator
-    st.title(text["train_title"][lang])
+# --------------- MEGA TRAIN CALCULATOR ---------------
+with tab1:
+    st.header(text["mega_train_title"][lang])
     st.markdown(text["train_intro"][lang])
 
     st.subheader(text["input_header"][lang])
@@ -126,116 +96,83 @@ with selected_tab[0]:
         cabins[name]['ev'] = ev
         ev_list.append((name, ev))
 
-    ev_list.sort(key=lambda x: (x[1] is not None, x[1]), reverse=True)
+    ev_list.sort(key=lambda x: -x[1] if x[1] else -1)
 
     st.subheader(text["ranking_header"][lang])
-    st.markdown(text["ev_description"][lang])
-
+    st.markdown(text["ev_desc"][lang])
     for rank, (name, ev) in enumerate(ev_list, start=1):
         if ev is None:
-            st.markdown(f"**{rank}. Cabin {name} — {text['cabins_no_input'][lang]}**")
+            st.markdown(f"**{rank}. Cabin {name} — (Please select number of players in the queue)**")
         else:
             st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
 
-with selected_tab[1]:
-    # T10 Grind Calculator
-    st.title(text["t10_title"][lang])
-    st.subheader(text["t10_header"][lang])
+# --------------- T10 CALCULATOR ---------------
+with tab2:
+    st.header(text["t10_title"][lang])
+    st.markdown(text["t10_intro"][lang])
 
-    adv_prot_levels = [str(i) for i in range(0, 11)]
-    adv_prot_levels[-1] = "10 (Max)"
-    hp_boost_levels = [str(i) for i in range(0, 11)]
-    hp_boost_levels[-1] = "10 (Max)"
-    atk_boost_levels = [str(i) for i in range(0, 11)]
-    atk_boost_levels[-1] = "10 (Max)"
-    def_boost_levels = [str(i) for i in range(0, 11)]
-    def_boost_levels[-1] = "10 (Max)"
-    unit_x_levels = ["0", "1 (Max)"]
+    level_options = [f"{i}" for i in range(0, 10)] + ["Max"]
+    unitx_option = ["0", "Max"]
 
-    adv_prot = st.selectbox({
-        "en": "Advanced Protection Level",
-        "vi": "Cấp độ Bảo vệ nâng cao",
-        "zh": "高级保护等级"
-    }[lang], adv_prot_levels, index=0)
+    col1, col2 = st.columns(2)
+    with col1:
+        adv = st.selectbox("Advanced Protection", level_options, index=0)
+        hp = st.selectbox("HP Boost III", level_options, index=0)
+    with col2:
+        atk = st.selectbox("Attack Boost III", level_options, index=0)
+        defn = st.selectbox("Defence Boost III", level_options, index=0)
+    unitx = st.selectbox("Unit X", unitx_option, index=0)
 
-    hp_boost = st.selectbox({
-        "en": "HP Boost III Level",
-        "vi": "Cấp độ Tăng HP III",
-        "zh": "生命提升 III 等级"
-    }[lang], hp_boost_levels, index=0)
+    def parse_level(val):
+        return 10 if val == "Max" else int(val)
 
-    atk_boost = st.selectbox({
-        "en": "Attack Boost III Level",
-        "vi": "Cấp độ Tăng Công III",
-        "zh": "攻击提升 III 等级"
-    }[lang], atk_boost_levels, index=0)
-
-    def_boost = st.selectbox({
-        "en": "Defense Boost III Level",
-        "vi": "Cấp độ Tăng Phòng III",
-        "zh": "防御提升 III 等级"
-    }[lang], def_boost_levels, index=0)
-
-    unit_x = st.selectbox({
-        "en": "Unit X Level",
-        "vi": "Cấp độ Unit X",
-        "zh": "单位 X 等级"
-    }[lang], unit_x_levels, index=0)
-
-    def parse_level(level_str):
-        return int(level_str.split()[0])
-
-    adv_prot_level = parse_level(adv_prot)
-    hp_boost_level = parse_level(hp_boost)
-    atk_boost_level = parse_level(atk_boost)
-    def_boost_level = parse_level(def_boost)
-    unit_x_level = parse_level(unit_x)
-
-    # Values as per your table (units in raw integers)
-    iron_costs_raw = {
-        "Advanced Protection": [0] + [175_000_000]*10,
-        "HP Boost III": [0] + [96_000_000]*10,
-        "Attack Boost III": [0, 96_000_000, 134_000_000, 134_000_000, 134_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000],
-        "Defense Boost III": [0, 96_000_000, 96_000_000, 134_000_000, 134_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000],
-        "Unit X": [0, 187_000_000]
-    }
-    bread_costs_raw = iron_costs_raw.copy()  # same as iron
-    gold_costs_raw = {
-        "Advanced Protection": [0] + [522_000_000]*10,
-        "HP Boost III": [0] + [287_000_000]*10,
-        "Attack Boost III": [0, 287_000_000, 403_000_000, 403_000_000, 403_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000],
-        "Defense Boost III": [0, 287_000_000, 287_000_000, 403_000_000, 403_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000],
-        "Unit X": [0, 560_000_000]
+    level_data = {
+        "Advanced Protection": parse_level(adv),
+        "HP Boost III": parse_level(hp),
+        "Attack Boost III": parse_level(atk),
+        "Defence Boost III": parse_level(defn),
+        "Unit X": parse_level(unitx)
     }
 
-    def sum_remaining(cost_list, current_level):
-        return sum(cost_list[current_level+1:])
+    # Cost per level in raw numbers
+    cost_table = {
+        "Advanced Protection": [
+            (31,31,91),(53,53,158),(53,53,158),(74,74,221),(74,74,221),
+            (96,96,287),(96,96,287),(134,134,403),(134,134,403),(175,175,522)
+        ],
+        "HP Boost III": [
+            (31,31,91),(53,53,158),(53,53,158),(74,74,221),(74,74,221),
+            (96,96,287),(96,96,287),(134,134,403),(134,134,403),(175,175,522)
+        ],
+        "Attack Boost III": [
+            (31,31,91),(53,53,158),(53,53,158),(74,74,221),(74,74,221),
+            (96,96,287),(96,96,287),(134,134,403),(134,134,403),(175,175,522)
+        ],
+        "Defence Boost III": [
+            (31,31,91),(53,53,158),(53,53,158),(74,74,221),(74,74,221),
+            (96,96,287),(96,96,287),(134,134,403),(134,134,403),(175,175,522)
+        ],
+        "Unit X": [
+            (187,187,560)
+        ]
+    }
 
-    iron_total_raw = (
-        sum_remaining(iron_costs_raw["Advanced Protection"], adv_prot_level)
-        + sum_remaining(iron_costs_raw["HP Boost III"], hp_boost_level)
-        + sum_remaining(iron_costs_raw["Attack Boost III"], atk_boost_level)
-        + sum_remaining(iron_costs_raw["Defense Boost III"], def_boost_level)
-        + sum_remaining(iron_costs_raw["Unit X"], unit_x_level)
-    )
+    # Accumulate cost
+    total_iron, total_bread, total_gold = 0,0,0
+    for cat, level in level_data.items():
+        for i in range(level):
+            iron, bread, gold = cost_table[cat][i]
+            total_iron += iron
+            total_bread += bread
+            total_gold += gold
 
-    bread_total_raw = iron_total_raw  # same values
+    def fmt(x):
+        return f"{x/1000:.1f}G" if x >= 1000 else f"{x:.1f}M"
 
-    gold_total_raw = (
-        sum_remaining(gold_costs_raw["Advanced Protection"], adv_prot_level)
-        + sum_remaining(gold_costs_raw["HP Boost III"], hp_boost_level)
-        + sum_remaining(gold_costs_raw["Attack Boost III"], atk_boost_level)
-        + sum_remaining(gold_costs_raw["Defense Boost III"], def_boost_level)
-        + sum_remaining(gold_costs_raw["Unit X"], unit_x_level)
-    )
+    st.subheader(text["resources_needed"][lang])
+    df = pd.DataFrame({
+        "Resource": ["Iron", "Bread", "Gold"],
+        "Amount": [fmt(total_iron), fmt(total_bread), fmt(total_gold)]
+    })
 
-    iron_total = iron_total_raw / 1_000_000
-    bread_total = bread_total_raw / 1_000_000
-    gold_total = gold_total_raw / 1_000_000
-
-    st.markdown(text["resource_total_header"][lang])
-    resource_labels = text["resource_labels"][lang]
-
-    st.write(f"- {resource_labels[0]}: {format_number(iron_total)}")
-    st.write(f"- {resource_labels[1]}: {format_number(bread_total)}")
-    st.write(f"- {resource_labels[2]}: {format_number(gold_total)}")
+    st.table(df)
