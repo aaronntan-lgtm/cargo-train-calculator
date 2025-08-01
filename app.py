@@ -3,9 +3,9 @@ import streamlit as st
 # Set up the page title and layout
 st.set_page_config(page_title="Last War Calculators", layout="centered")
 
-# Create tabs
+# Horizontal Tabs Setup using st.radio
 tab_titles = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
-selected_tab = st.selectbox("Select Calculator", tab_titles)
+selected_tab = st.radio("Select Calculator", tab_titles, horizontal=True)
 
 # Arms Race Calculator (Placeholder)
 if selected_tab == 'Arms Race Calculator':
