@@ -1,23 +1,8 @@
 import streamlit as st
-import pandas as pd
 
-# Set page configuration
-st.set_page_config(page_title="Last War Tools", layout="wide")
+st.set_page_config(page_title="Best Cargo Train Calculator")
 
-# Custom CSS for dropdown styling
-st.markdown("""
-    <style>
-    div[data-baseweb="select"] > div {
-        border-color: #28a745 !important;
-        box-shadow: 0 0 0 1px #28a745 !important;
-    }
-    .block-container {
-        padding-top: 2rem;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Language options
+# Move language selector to the top
 languages = {
     "English": "en",
     "Tiếng Việt": "vi",
@@ -26,27 +11,32 @@ languages = {
 lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
 lang = languages[lang_choice]
 
+# Custom CSS for green dropdown styling
+st.markdown("""
+    <style>
+    div[data-baseweb="select"] > div {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 1px #28a745 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Localized content
 text = {
-    "tabs": {
-        "en": ["🚂 Mega Express Train", "🪖 T10 Grind"],
-        "vi": ["🚂 Tàu Cao Tốc", "🪖 Cày T10"],
-        "zh": ["🚂 特快列車", "🪖 T10 升級"]
-    },
-    "train_title": {
+    "title_train": {
         "en": "🚂 Mega Express Train",
-        "vi": "🚂 Tàu Cao Tốc",
-        "zh": "🚂 特快列車"
+        "vi": "🚂 Tàu cao tốc Mega",
+        "zh": "🚂 超級特快列車"
     },
-    "train_intro": {
-        "en": "Select your best cabin based on current queue sizes.",
-        "vi": "Chọn khoang tốt nhất dựa trên số người xếp hàng hiện tại.",
-        "zh": "根據目前排隊人數選擇最佳車廂。"
+    "title_t10": {
+        "en": "🪖 T10 Grind",
+        "vi": "🪖 Cày T10",
+        "zh": "🪖 T10 升級"
     },
     "ev_description": {
         "en": "**What is EV?** Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice.",
-        "vi": "**EV là gì?** Giá trị kỳ vọng (EV) ước tính mức lợi trung bình theo thời gian. EV càng cao càng tốt.",
-        "zh": "**什麼是 EV？** EV（期望值）表示長期平均收益。EV 越高，選擇越優。"
+        "vi": "**EV là gì?** Giá trị kỳ vọng (EV) ước tính mức lợi trung bình của bạn theo thời gian. EV càng cao thì lựa chọn càng tốt về lâu dài.",
+        "zh": "**什麼是 EV？** 期望值 (EV) 表示你長期平均能獲得的收益。EV 越高，長期表現越好。"
     },
     "input_header": {
         "en": "📥 Input Queue Sizes for Each Cabin",
@@ -54,43 +44,29 @@ text = {
         "zh": "📥 輸入每個車廂的排隊人數"
     },
     "input_label": {
-        "en": "Cabin {name} (Enter number of players)",
-        "vi": "Khoang {name} (Nhập số người chơi)",
-        "zh": "車廂 {name}（輸入玩家數）"
+        "en": "Cabin {name} (Enter the number of passengers in the queue here)",
+        "vi": "Khoang {name} (Nhập số người xếp hàng tại đây)",
+        "zh": "車廂 {name}（請輸入排隊人數）"
     },
     "ranking_header": {
         "en": "📊 Cabin Rankings by EV",
-        "vi": "📊 Xếp hạng theo EV",
-        "zh": "📊 EV 排名"
+        "vi": "📊 Xếp hạng các khoang theo EV",
+        "zh": "📊 根據 EV 排名的車廂"
     },
-    "t10_title": {
-        "en": "🪖 T10 Grind",
-        "vi": "🪖 Cày T10",
-        "zh": "🪖 T10 升級"
-    },
-    "t10_intro": {
-        "en": "Select your current research level to calculate remaining costs.",
-        "vi": "Chọn cấp độ nghiên cứu hiện tại để tính chi phí còn lại.",
-        "zh": "選擇你當前的研究等級以計算剩餘資源。"
-    },
-    "t10_table_header": {
-        "en": "📋 Resources needed for T10",
-        "vi": "📋 Tài nguyên cần để mở T10",
-        "zh": "📋 解鎖 T10 所需資源"
+    "resources_header": {
+        "en": "📦 Resources needed for T10",
+        "vi": "📦 Tài nguyên cần thiết cho T10",
+        "zh": "📦 T10 所需資源"
     }
 }
 
-# Tabs
-tabs = st.tabs(text["tabs"][lang])
+tab1, tab2 = st.tabs([text["title_train"][lang], text["title_t10"][lang]])
 
-# ------------------------ Train Calculator ------------------------
-with tabs[0]:
-    st.title(text["train_title"][lang])
-    st.markdown(text["train_intro"][lang])
-    st.subheader(text["ranking_header"][lang])
+with tab1:
+    st.title(text["title_train"][lang])
     st.markdown(text["ev_description"][lang])
-
     st.subheader(text["input_header"][lang])
+
     queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=0)
     queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=0)
     queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=0)
@@ -115,68 +91,99 @@ with tabs[0]:
 
     ev_list.sort(key=lambda x: -x[1])
 
+    st.subheader(text["ranking_header"][lang])
     for rank, (name, ev) in enumerate(ev_list, start=1):
-        if cabins[name]['queue'] == 0:
+        if ev == float('inf'):
             st.markdown(f"**{rank}. Cabin {name} — (Please select number of players in the queue)**")
         else:
             st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
 
-# ------------------------ T10 Calculator ------------------------
-with tabs[1]:
-    st.title(text["t10_title"][lang])
-    st.markdown(text["t10_intro"][lang])
+with tab2:
+    st.title(text["title_t10"][lang])
 
-    # Cost data
-    t10_data = {
+    def format_number(n):
+        if n >= 1_000_000_000:
+            return f"{n / 1_000_000_000:.1f}G"
+        elif n >= 1_000_000:
+            return f"{n / 1_000_000:.1f}M"
+        return str(n)
+
+    research_data = {
         "Advanced Protection": [
-            (31, 31, 91), (53, 53, 158), (53, 53, 158), (74, 74, 221), (74, 74, 221),
-            (96, 96, 287), (96, 96, 287), (134, 134, 403), (134, 134, 403), (175, 175, 522)
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
         ],
         "HP Boost": [
-            (31, 31, 91), (53, 53, 158), (53, 53, 158), (74, 74, 221), (74, 74, 221),
-            (96, 96, 287), (96, 96, 287), (134, 134, 403), (134, 134, 403), (175, 175, 522)
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
         ],
         "Attack Boost": [
-            (31, 31, 91), (53, 53, 158), (53, 53, 158), (74, 74, 221), (74, 74, 221),
-            (96, 96, 287), (96, 96, 287), (134, 134, 403), (134, 134, 403), (175, 175, 522)
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
         ],
         "Defense Boost": [
-            (31, 31, 91), (53, 53, 158), (53, 53, 158), (74, 74, 221), (74, 74, 221),
-            (96, 96, 287), (96, 96, 287), (134, 134, 403), (134, 134, 403), (175, 175, 522)
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
         ],
-        "Unit X": [(187, 187, 560)]
+        "Unit X": [(187_000_000, 187_000_000, 560_000_000)]
     }
 
-    # Dropdowns for each category
     levels = {}
-    col1, col2 = st.columns(2)
-    with col1:
-        levels["Advanced Protection"] = st.selectbox("Advanced Protection", list(range(0, 11)), index=0, format_func=lambda x: "Max" if x == 10 else x)
-        levels["Attack Boost"] = st.selectbox("Attack Boost III", list(range(0, 11)), index=0, format_func=lambda x: "Max" if x == 10 else x)
-    with col2:
-        levels["HP Boost"] = st.selectbox("HP Boost III", list(range(0, 11)), index=0, format_func=lambda x: "Max" if x == 10 else x)
-        levels["Defense Boost"] = st.selectbox("Defense Boost III", list(range(0, 11)), index=0, format_func=lambda x: "Max" if x == 10 else x)
+    for name, steps in research_data.items():
+        max_level = len(steps)
+        label = name
+        levels[name] = st.selectbox(
+            label,
+            list(range(0, max_level + 1)),
+            index=0,
+            format_func=lambda x: "Max" if x == max_level else str(x)
+        )
 
-    levels["Unit X"] = st.selectbox("Unit X", [0, 1], index=0, format_func=lambda x: "Max" if x == 1 else x)
+    total_iron = 0
+    total_bread = 0
+    total_gold = 0
 
-    # Calculate remaining cost
-    iron_total = bread_total = gold_total = 0
-    for category, level in levels.items():
-        steps = t10_data[category][level:]
-        for iron, bread, gold in steps:
-            iron_total += iron
-            bread_total += bread
-            gold_total += gold
+    for name, level in levels.items():
+        steps = research_data[name]
+        for i in range(level):
+            iron, bread, gold = steps[i]
+            total_iron += iron
+            total_bread += bread
+            total_gold += gold
 
-    def format_number(val):
-        if val >= 1_000:
-            return f"{val/1000:.1f}G"
-        return f"{val:.1f}M"
-
-    st.subheader(text["t10_table_header"][lang])
-    df = pd.DataFrame([
-        {"Resource": "Iron", "Amount": format_number(iron_total)},
-        {"Resource": "Bread", "Amount": format_number(bread_total)},
-        {"Resource": "Gold", "Amount": format_number(gold_total)}
-    ])
-    st.table(df.set_index("Resource"))
+    st.markdown("### " + text["resources_header"][lang])
+    st.markdown(f"- **Iron**: {format_number(total_iron)}")
+    st.markdown(f"- **Bread**: {format_number(total_bread)}")
+    st.markdown(f"- **Gold**: {format_number(total_gold)}")
