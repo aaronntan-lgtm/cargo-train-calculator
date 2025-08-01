@@ -60,12 +60,12 @@ text = {
 st.title(text["title"][lang])
 st.markdown(text["intro"][lang])
 
-# Input section
+# Input section with default queue sizes set to 0
 st.subheader(text["input_header"][lang])
-queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=11)
-queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=9)
-queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=13)
-queue_d = st.number_input(text["input_label"][lang].format(name="D"), min_value=0, value=22)
+queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=0)
+queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=0)
+queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=0)
+queue_d = st.number_input(text["input_label"][lang].format(name="D"), min_value=0, value=0)
 
 # Cabin values
 cabins = {
@@ -102,3 +102,4 @@ for rank, (name, ev) in enumerate(ev_list, start=1):
 # EV explanation moved below rankings
 st.markdown("---")
 st.markdown(text["ev_description"][lang])
+
