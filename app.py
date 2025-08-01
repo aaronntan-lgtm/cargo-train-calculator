@@ -83,9 +83,9 @@ text = {
 
 def format_number(num):
     """Format number with M or G suffix"""
-    if num >= 1_000:
+    if num >= 1000:
         # Billions
-        return f"{num/1_000:.1f}G"
+        return f"{num/1000:.1f}G"
     elif num >= 1:
         # Millions
         return f"{num:.1f}M"
@@ -145,7 +145,8 @@ with selected_tab[1]:
     st.title(text["t10_title"][lang])
     st.subheader(text["t10_header"][lang])
 
-    adv_prot_levels = [str(i) for i in range(1, 11)]
+    # Levels for dropdowns - all start at 0 except Advanced Protection now starts at 0
+    adv_prot_levels = [str(i) for i in range(0, 11)]
     adv_prot_levels[-1] = "10 (Max)"
 
     hp_boost_levels = [str(i) for i in range(0, 11)]
@@ -198,51 +199,55 @@ with selected_tab[1]:
     def_boost_level = parse_level(def_boost)
     unit_x_level = parse_level(unit_x)
 
-    # Costs converted to millions (original / 1,000,000)
-    iron_costs = {
-        "Advanced Protection": [0, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175],
-        "HP Boost III": [0, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096],
-        "Attack Boost III": [0, 0.096, 0.134, 0.134, 0.134, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175],
-        "Defense Boost III": [0, 0.096, 0.096, 0.134, 0.134, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175],
-        "Unit X": [0, 0.187]
+    # Original raw costs (no longer divided by 1,000,000 here)
+    iron_costs_raw = {
+        "Advanced Protection": [0, 175, 175, 175, 175, 175, 175, 175, 175, 175, 175],
+        "HP Boost III": [0, 96, 96, 96, 96, 96, 96, 96, 96, 96, 96],
+        "Attack Boost III": [0, 96, 134, 134, 134, 175, 175, 175, 175, 175, 175],
+        "Defense Boost III": [0, 96, 96, 134, 134, 175, 175, 175, 175, 175, 175],
+        "Unit X": [0, 187]
     }
-    bread_costs = iron_costs  # same as iron
-    gold_costs = {
-        "Advanced Protection": [0, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522],
-        "HP Boost III": [0, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287],
-        "Attack Boost III": [0, 0.287, 0.403, 0.403, 0.403, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522],
-        "Defense Boost III": [0, 0.287, 0.287, 0.403, 0.403, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522],
-        "Unit X": [0, 0.560]
+    bread_costs_raw = iron_costs_raw  # same as iron
+    gold_costs_raw = {
+        "Advanced Protection": [0, 522, 522, 522, 522, 522, 522, 522, 522, 522, 522],
+        "HP Boost III": [0, 287, 287, 287, 287, 287, 287, 287, 287, 287, 287],
+        "Attack Boost III": [0, 287, 403, 403, 403, 522, 522, 522, 522, 522, 522],
+        "Defense Boost III": [0, 287, 287, 403, 403, 522, 522, 522, 522, 522, 522],
+        "Unit X": [0, 560]
     }
 
     def sum_remaining(cost_list, current_level):
-        # current_level is 0-based index for costs list
         # sum from next level to end
-        return sum(cost_list[current_level + 1 :])
+        return sum(cost_list[current_level + 1:])
 
-    iron_total = (
-        sum_remaining(iron_costs["Advanced Protection"], adv_prot_level)
-        + sum_remaining(iron_costs["HP Boost III"], hp_boost_level)
-        + sum_remaining(iron_costs["Attack Boost III"], atk_boost_level)
-        + sum_remaining(iron_costs["Defense Boost III"], def_boost_level)
-        + sum_remaining(iron_costs["Unit X"], unit_x_level)
+    iron_total_raw = (
+        sum_remaining(iron_costs_raw["Advanced Protection"], adv_prot_level)
+        + sum_remaining(iron_costs_raw["HP Boost III"], hp_boost_level)
+        + sum_remaining(iron_costs_raw["Attack Boost III"], atk_boost_level)
+        + sum_remaining(iron_costs_raw["Defense Boost III"], def_boost_level)
+        + sum_remaining(iron_costs_raw["Unit X"], unit_x_level)
     )
 
-    bread_total = (
-        sum_remaining(bread_costs["Advanced Protection"], adv_prot_level)
-        + sum_remaining(bread_costs["HP Boost III"], hp_boost_level)
-        + sum_remaining(bread_costs["Attack Boost III"], atk_boost_level)
-        + sum_remaining(bread_costs["Defense Boost III"], def_boost_level)
-        + sum_remaining(bread_costs["Unit X"], unit_x_level)
+    bread_total_raw = (
+        sum_remaining(bread_costs_raw["Advanced Protection"], adv_prot_level)
+        + sum_remaining(bread_costs_raw["HP Boost III"], hp_boost_level)
+        + sum_remaining(bread_costs_raw["Attack Boost III"], atk_boost_level)
+        + sum_remaining(bread_costs_raw["Defense Boost III"], def_boost_level)
+        + sum_remaining(bread_costs_raw["Unit X"], unit_x_level)
     )
 
-    gold_total = (
-        sum_remaining(gold_costs["Advanced Protection"], adv_prot_level)
-        + sum_remaining(gold_costs["HP Boost III"], hp_boost_level)
-        + sum_remaining(gold_costs["Attack Boost III"], atk_boost_level)
-        + sum_remaining(gold_costs["Defense Boost III"], def_boost_level)
-        + sum_remaining(gold_costs["Unit X"], unit_x_level)
+    gold_total_raw = (
+        sum_remaining(gold_costs_raw["Advanced Protection"], adv_prot_level)
+        + sum_remaining(gold_costs_raw["HP Boost III"], hp_boost_level)
+        + sum_remaining(gold_costs_raw["Attack Boost III"], atk_boost_level)
+        + sum_remaining(gold_costs_raw["Defense Boost III"], def_boost_level)
+        + sum_remaining(gold_costs_raw["Unit X"], unit_x_level)
     )
+
+    # Convert raw totals to millions for display
+    iron_total = iron_total_raw / 1_000_000
+    bread_total = bread_total_raw / 1_000_000
+    gold_total = gold_total_raw / 1_000_000
 
     st.markdown(text["resource_total_header"][lang])
     resource_labels = text["resource_labels"][lang]
