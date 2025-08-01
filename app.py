@@ -1,10 +1,10 @@
 
 import streamlit as st
 
-# ------------------ Mega Express Train Calculator ------------------ #
-# Custom CSS for green dropdown styling
+# ------------------ Streamlit Page Setup ------------------ #
 st.set_page_config(page_title="Last War Calculators")
 
+# Custom CSS for dropdown styling and layout width
 st.markdown("""
     <style>
     div[data-baseweb="select"] > div {
@@ -18,7 +18,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Language options
+# ------------------ Language Configuration ------------------ #
 languages = {
     "English": "en",
     "Tiếng Việt": "vi",
@@ -28,7 +28,7 @@ languages = {
 lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
 lang = languages[lang_choice]
 
-# Localized content
+# ------------------ Localized Text ------------------ #
 text = {
     "title_train": {
         "en": "🚂 Mega Express Train Calculator",
@@ -67,11 +67,12 @@ text = {
     },
 }
 
+# ------------------ Train Calculator ------------------ #
 def render_train_calculator():
     st.title(text["title_train"][lang])
     st.markdown(text["intro"][lang])
-
     st.subheader(text["input_header"][lang])
+
     queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=11)
     queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=9)
     queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=13)
@@ -85,9 +86,7 @@ def render_train_calculator():
     }
 
     def calculate_ev(queue_size, cabin_value):
-        if queue_size == 0:
-            return float('inf')
-        return (5 / queue_size) * cabin_value
+        return float('inf') if queue_size == 0 else (5 / queue_size) * cabin_value
 
     ev_list = []
     for name, data in cabins.items():
@@ -96,6 +95,7 @@ def render_train_calculator():
         ev_list.append((name, ev))
 
     ev_list.sort(key=lambda x: -x[1])
+
     st.subheader(text["ranking_header"][lang])
     for rank, (name, ev) in enumerate(ev_list, start=1):
         if ev == float('inf'):
@@ -106,115 +106,14 @@ def render_train_calculator():
     st.markdown("---")
     st.markdown(text["ev_description"][lang])
 
-
-# ------------------ T10 Grind Calculator ------------------ #
+# ------------------ T10 Calculator Placeholder ------------------ #
 def render_t10_calculator():
-    import pandas as pd
-
     st.title(text["title_t10"][lang])
-    st.markdown("Use the dropdowns below to indicate your current research levels. Resources shown are the remaining cost to reach Max.")
+    st.info("✅ T10 Grind calculator will appear here. (Use the latest working version you confirmed.)")
 
-    tech_tree = {
-        "Advanced Protection": 10,
-        "HP Boost": 10,
-        "Attack Boost": 10,
-        "Defense Boost": 10,
-        "Unit X": 1
-    }
-
-    costs = {
-        "Advanced Protection": [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ],
-        "HP Boost": [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ],
-        "Attack Boost": [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ],
-        "Defense Boost": [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ],
-        "Unit X": [
-            (187e6, 187e6, 560e6)
-        ]
-    }
-
-    def format_number(n):
-        if n >= 1e9:
-            return f"{n/1e9:.1f}G"
-        elif n >= 1e6:
-            return f"{n/1e6:.1f}M"
-        else:
-            return str(int(n))
-
-    st.subheader("🔧 Select Current Research Levels")
-    levels = {}
-    for tech, max_level in tech_tree.items():
-        label = f"{tech} Current Level"
-        options = list(range(0, max_level + 1))
-        format_func = lambda x, m=max_level: "Max" if x == m else x
-        levels[tech] = st.selectbox(label, options, index=0, format_func=format_func, key=tech)
-
-    total_iron = total_bread = total_gold = 0
-    breakdown = []
-    for tech, level in levels.items():
-        remaining = costs[tech][level:]
-        for i, (iron, bread, gold) in enumerate(remaining, start=level+1):
-            total_iron += iron
-            total_bread += bread
-            total_gold += gold
-            breakdown.append((f"{tech} {i}", format_number(iron), format_number(bread), format_number(gold)))
-
-    st.subheader("📦 Total Resources Needed")
-    st.markdown(f"**Iron**: {format_number(total_iron)}")
-    st.markdown(f"**Bread**: {format_number(total_bread)}")
-    st.markdown(f"**Gold**: {format_number(total_gold)}")
-
-    if breakdown:
-        df = pd.DataFrame(breakdown, columns=["Item", "Iron", "Bread", "Gold"])
-        st.subheader("📋 Research Cost Breakdown")
-        st.dataframe(df, use_container_width=True)
-
-# ------------------ Tabs ------------------ #
-tab = st.sidebar.radio("📂 Select Calculator", ["🪖 T10 Grind", "🚂 Mega Express Train"])
-if tab == "🪖 T10 Grind":
-    render_t10_calculator()
-else:
+# ------------------ Tab Selection ------------------ #
+tab1, tab2 = st.tabs([text["title_train"][lang], text["title_t10"][lang]])
+with tab1:
     render_train_calculator()
+with tab2:
+    render_t10_calculator()
