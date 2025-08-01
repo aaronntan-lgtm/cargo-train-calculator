@@ -1,26 +1,40 @@
 
 import streamlit as st
 
+# ------------------- SETUP -------------------
 st.set_page_config(page_title="Last War Tools", layout="centered")
 
-# Language options
+# Custom CSS for styling
+st.markdown("""
+    <style>
+    div[data-baseweb="select"] > div {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 1px #28a745 !important;
+    }
+    .main > div {
+        max-width: 900px;
+        margin: auto;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Language selection
 languages = {
     "English": "en",
     "Tiếng Việt": "vi",
     "繁體中文": "zh"
 }
-
 lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
 lang = languages[lang_choice]
 
-# Localized content
-text_train = {
-    "title": {
+# Translations
+text = {
+    "title_train": {
         "en": "🚂 Best Cargo Train Calculator",
         "vi": "🚂 Trình tính khoang tàu tốt nhất",
         "zh": "🚂 最佳貨運列車計算器"
     },
-    "intro": {
+    "intro_train": {
         "en": "Select your best cabin based on current queue sizes. This assumes that Cabin D is the best, followed by Cabin A, and Cabins B & C have equal value.",
         "vi": "Chọn khoang tốt nhất dựa trên số người xếp hàng hiện tại. Khoang D có giá trị cao nhất, tiếp theo là A, còn B và C có giá trị bằng nhau.",
         "zh": "根據目前排隊人數選擇最佳車廂。車廂 D 為最高價值，其次為 A，B 和 C 價值相同。"
@@ -45,27 +59,37 @@ text_train = {
         "vi": "📊 Xếp hạng các khoang theo EV",
         "zh": "📊 根據 EV 排名的車廂"
     },
+    "title_t10": {
+        "en": "🪖 T10 Grind Calculator",
+        "vi": "🪖 Máy tính T10 Grind",
+        "zh": "🪖 T10 研究計算器"
+    },
+    "t10_placeholder": {
+        "en": "T10 Calculator logic will go here...",
+        "vi": "Logic máy tính T10 sẽ nằm ở đây...",
+        "zh": "T10 計算器邏輯將放在這裡..."
+    }
 }
 
-# Tabs
-tab1, tab2 = st.tabs(["🪖 T10 Grind", "🚂 Mega Express Train"])
+# ------------------- TABS -------------------
+tab1, tab2 = st.tabs(["T10 Grind", "Mega Express Train"])
 
-# T10 Calculator Tab
+# ------------------- T10 GRIND -------------------
 with tab1:
-    st.markdown("## 🪖 T10 Grind")
-    st.markdown("Coming soon... (previous code inserted here by script)")
+    st.header(text["title_t10"][lang])
+    from t10_logic import render_t10_calculator
+    render_t10_calculator(lang)
 
-# Train Calculator Tab
+# ------------------- TRAIN CALCULATOR -------------------
 with tab2:
-    st.title(text_train["title"][lang])
-    st.markdown(text_train["intro"][lang])
+    st.title(text["title_train"][lang])
+    st.markdown(text["intro_train"][lang])
+    st.subheader(text["input_header"][lang])
 
-    # Input section
-    st.subheader(text_train["input_header"][lang])
-    queue_a = st.number_input(text_train["input_label"][lang].format(name="A"), min_value=0, value=11)
-    queue_b = st.number_input(text_train["input_label"][lang].format(name="B"), min_value=0, value=9)
-    queue_c = st.number_input(text_train["input_label"][lang].format(name="C"), min_value=0, value=13)
-    queue_d = st.number_input(text_train["input_label"][lang].format(name="D"), min_value=0, value=22)
+    queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=11)
+    queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=9)
+    queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=13)
+    queue_d = st.number_input(text["input_label"][lang].format(name="D"), min_value=0, value=22)
 
     cabins = {
         'A': {'queue': queue_a, 'value': 2},
@@ -87,7 +111,7 @@ with tab2:
 
     ev_list.sort(key=lambda x: -x[1])
 
-    st.subheader(text_train["ranking_header"][lang])
+    st.subheader(text["ranking_header"][lang])
     for rank, (name, ev) in enumerate(ev_list, start=1):
         if ev == float('inf'):
             st.markdown(f"**{rank}. Cabin {name} — 100% chance of entry**")
@@ -95,4 +119,4 @@ with tab2:
             st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
 
     st.markdown("---")
-    st.markdown(text_train["ev_description"][lang])
+    st.markdown(text["ev_description"][lang])
