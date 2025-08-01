@@ -1,9 +1,29 @@
-
 import streamlit as st
 
-st.set_page_config(page_title="Last War Tools Suite")
+# Page config
+st.set_page_config(page_title="Last War Calculators")
 
-# =================== Language Setup ===================
+# Language selector at the top
+# [Insert language bar and localization dict here]
+
+# Tabs
+tab1, tab2 = st.tabs(["🚂 Train Calculator", "🪖 T10 Calculator"])
+
+with tab1:
+    # Paste Train Calculator code here
+    st.set_page_config(page_title="Best Cargo Train Calculator")
+
+# Custom CSS for green dropdown styling
+st.markdown("""
+    <style>
+    div[data-baseweb="select"] > div {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 1px #28a745 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Language options
 languages = {
     "English": "en",
     "Tiếng Việt": "vi",
@@ -13,14 +33,14 @@ languages = {
 lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
 lang = languages[lang_choice]
 
-# =================== Localized Text ===================
+# Localized content
 text = {
-    "train_title": {
+    "title": {
         "en": "🚂 Best Cargo Train Calculator",
         "vi": "🚂 Trình tính khoang tàu tốt nhất",
         "zh": "🚂 最佳貨運列車計算器"
     },
-    "train_intro": {
+    "intro": {
         "en": "Select your best cabin based on current queue sizes. This assumes that Cabin D is the best, followed by Cabin A, and Cabins B & C have equal value.",
         "vi": "Chọn khoang tốt nhất dựa trên số người xếp hàng hiện tại. Khoang D có giá trị cao nhất, tiếp theo là A, còn B và C có giá trị bằng nhau.",
         "zh": "根據目前排隊人數選擇最佳車廂。車廂 D 為最高價值，其次為 A，B 和 C 價值相同。"
@@ -45,69 +65,55 @@ text = {
         "vi": "📊 Xếp hạng các khoang theo EV",
         "zh": "📊 根據 EV 排名的車廂"
     },
-    "t10_title": {
-        "en": "🪖 T10 Research Calculator",
-        "vi": "🪖 Trình tính nghiên cứu T10",
-        "zh": "🪖 T10 研究計算器"
-    }
 }
 
-# =================== T10 Data and Functions ===================
-t10_data = {
-    "Advanced Protection": [
-        (31_000_000, 31_000_000, 91_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (175_000_000, 175_000_000, 522_000_000)
-    ],
-    "HP Boost": [
-        (31_000_000, 31_000_000, 91_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (175_000_000, 175_000_000, 522_000_000)
-    ],
-    "Attack Boost": [
-        (31_000_000, 31_000_000, 91_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (175_000_000, 175_000_000, 522_000_000)
-    ],
-    "Defense Boost": [
-        (31_000_000, 31_000_000, 91_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (53_000_000, 53_000_000, 158_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (74_000_000, 74_000_000, 221_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (96_000_000, 96_000_000, 287_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (134_000_000, 134_000_000, 403_000_000),
-        (175_000_000, 175_000_000, 522_000_000)
-    ],
-    "Unit X": (187_000_000, 187_000_000, 560_000_000)
+# Set title and intro
+st.title(text["title"][lang])
+st.markdown(text["intro"][lang])
+
+# Input section
+st.subheader(text["input_header"][lang])
+queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=11)
+queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=9)
+queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=13)
+queue_d = st.number_input(text["input_label"][lang].format(name="D"), min_value=0, value=22)
+
+# Cabin values
+cabins = {
+    'A': {'queue': queue_a, 'value': 2},
+    'B': {'queue': queue_b, 'value': 1},
+    'C': {'queue': queue_c, 'value': 1},
+    'D': {'queue': queue_d, 'value': 4}
 }
 
-def format_number(n):
-    if n >= 1_000_000_000:
-        return f"{n / 1_000_000_000:.1f}G"
-    elif n >= 1_000_000:
-        return f"{n / 1_000_000:.1f}M"
-    return str(n)
+# EV calculator
+def calculate_ev(queue_size, cabin_value):
+    if queue_size == 0:
+        return float('inf')
+    return (5 / queue_size) * cabin_value
+
+# Compute EVs
+ev_list = []
+for name, data in cabins.items():
+    ev = calculate_ev(data['queue'], data['value'])
+    cabins[name]['ev'] = ev
+    ev_list.append((name, ev))
+
+# Sort cabins by EV descending
+ev_list.sort(key=lambda x: -x[1])
+
+# Ranking section
+st.subheader(text["ranking_header"][lang])
+for rank, (name, ev) in enumerate(ev_list, start=1):
+    if ev == float('inf'):
+        st.markdown(f"**{rank}. Cabin {name} — 100% chance of entry**")
+    else:
+        st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
+
+# EV explanation moved below rankings
+st.markdown("---")
+st.markdown(text["ev_description"][lang])
+
+with tab2:
+    # Paste T10 Calculator code here
+    
