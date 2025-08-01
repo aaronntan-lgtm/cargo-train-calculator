@@ -1,17 +1,15 @@
 import streamlit as st
 
-# Set up the page title and layout in dark mode
-st.set_page_config(page_title="Last War Calculators", layout="centered", page_icon="🚂")
-st.markdown(
-    """
-    <style>
-    /* Enable dark mode */
-    .css-1d391kg {background-color: #181818; color: #fff;}
-    .css-18e3t3k {background-color: #181818; color: #fff;}
-    .stButton>button {background-color: #4CAF50; color: white;}
-    .stRadio>label, .stSelectbox>label, .stNumberInput>label, .stMarkdown {color: white;}
+# Enable dark mode by default
+st.set_page_config(page_title="Last War Calculators", layout="centered", page_icon="🚂", theme="dark")
 
-    /* Custom tab styles for horizontal tabs */
+# Create a container for the tabs with custom CSS
+tabs = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
+
+# Custom CSS for tabs (Excel-style tabs layout in dark mode)
+tab_css = """
+    <style>
+    /* Tabs layout and styling */
     .tabs {
         display: flex;
         cursor: pointer;
@@ -19,6 +17,7 @@ st.markdown(
         border: 1px solid #444;
         margin-bottom: 1rem;
         font-weight: bold;
+        color: #bbb;
     }
     .tabs div {
         padding: 12px 20px;
@@ -39,17 +38,27 @@ st.markdown(
         background-color: #4CAF50;
         color: white;
     }
+
+    /* Streamlit's default button color */
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    /* Fix some styling issues with certain elements in dark mode */
+    .stRadio>label, .stSelectbox>label, .stNumberInput>label, .stMarkdown {
+        color: white;
+    }
     </style>
-    """, unsafe_allow_html=True
-)
+"""
 
-# List of tabs
-tabs = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
+# Inject the custom CSS into the Streamlit app
+st.markdown(tab_css, unsafe_allow_html=True)
 
-# Display tabs horizontally across
+# Create the tab navigation
 selected_tab = st.radio("Select Calculator", tabs, index=0, horizontal=True)
 
-# Function to display content for the selected tab
+# Create the content for each tab
 def display_tabs(selected_tab):
     if selected_tab == 'Arms Race Calculator':
         st.title("Arms Race Calculator")
@@ -97,73 +106,4 @@ def display_tabs(selected_tab):
                 "zh": "根據目前排隊人數選擇最佳車廂。車廂 D 為最高價值，其次為 A，B 和 C 價值相同。"
             },
             "ev_description": {
-                "en": "**What is EV?** Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice.",
-                "vi": "**EV là gì?** Giá trị kỳ vọng (EV) ước tính mức lợi trung bình của bạn theo thời gian. EV càng cao thì lựa chọn càng tốt về lâu dài.",
-                "zh": "**什麼是 EV？** 期望值 (EV) 表示你長期平均能獲得的收益。EV 越高，長期表現越好。"
-            },
-            "input_header": {
-                "en": "📥 Input Queue Sizes for Each Cabin",
-                "vi": "📥 Nhập số người đang xếp hàng tại mỗi khoang",
-                "zh": "📥 輸入每個車廂的排隊人數"
-            },
-            "input_label": {
-                "en": "Cabin {name} (Enter the number of passengers in the queue here)",
-                "vi": "Khoang {name} (Nhập số người xếp hàng tại đây)",
-                "zh": "車廂 {name}（請輸入排隊人數）"
-            },
-            "ranking_header": {
-                "en": "📊 Cabin Rankings by EV",
-                "vi": "📊 Xếp hạng các khoang theo EV",
-                "zh": "📊 根據 EV 排名的車廂"
-            },
-        }
-
-        # Set title and intro
-        st.title(text["title"][lang])
-        st.markdown(text["intro"][lang])
-
-        # Input section with default values set to 0
-        st.subheader(text["input_header"][lang])
-        queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=0)
-        queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=0)
-        queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=0)
-        queue_d = st.number_input(text["input_label"][lang].format(name="D"), min_value=0, value=0)
-
-        # Cabin values
-        cabins = {
-            'A': {'queue': queue_a, 'value': 2},
-            'B': {'queue': queue_b, 'value': 1},
-            'C': {'queue': queue_c, 'value': 1},
-            'D': {'queue': queue_d, 'value': 4}
-        }
-
-        # EV calculator
-        def calculate_ev(queue_size, cabin_value):
-            if queue_size == 0:
-                return float('inf')
-            return (5 / queue_size) * cabin_value
-
-        # Compute EVs
-        ev_list = []
-        for name, data in cabins.items():
-            ev = calculate_ev(data['queue'], data['value'])
-            cabins[name]['ev'] = ev
-            ev_list.append((name, ev))
-
-        # Sort cabins by EV descending
-        ev_list.sort(key=lambda x: -x[1])
-
-        # Ranking section
-        st.subheader(text["ranking_header"][lang])
-        for rank, (name, ev) in enumerate(ev_list, start=1):
-            if ev == float('inf'):
-                st.markdown(f"**{rank}. Cabin {name} — Please input number of passengers currently in the queue**")
-            else:
-                st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}")
-
-        # EV explanation moved below rankings
-        st.markdown("---")
-        st.markdown(text["ev_description"][lang])
-
-# Call the function to display the selected tab content
-display_tabs(selected_tab)
+                "en": "**What is**
