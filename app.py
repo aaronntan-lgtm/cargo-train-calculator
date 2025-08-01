@@ -2,74 +2,48 @@
 import streamlit as st
 import pandas as pd
 
-# Set Streamlit page config
-st.set_page_config(page_title="Last War Calculators", layout="centered")
+# Utility function
+def format_number(value):
+    if value >= 1_000_000_000:
+        return f"{value / 1_000_000_000:.1f}G"
+    elif value >= 1_000_000:
+        return f"{value / 1_000_000:.1f}M"
+    return str(value)
 
-# Language selection bar at the top
-language = st.selectbox("🌐 Language", ["English", "Tiếng Việt", "繁體中文"])
+# Sidebar Language Toggle
+lang = st.sidebar.selectbox("🌐 Language", ["English", "Vietnamese", "Traditional Chinese"])
 
-# Translation dictionaries
-translations = {
-    "English": {
-        "Mega Express Train": "🚆 Mega Express Train",
-        "T10 Grind": "🪖 T10 Grind",
-        "Players in Queue": "Number of players in the queue",
-        "Cabin": "Cabin",
-        "Chance": "Chance of entry",
-        "EV": "Expected Value (EV)",
-        "EV Explanation": "What is EV? Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice.",
-        "Total Resources Needed": "💰 Total Resources Needed",
-        "Research Cost Breakdown": "📘 Research Cost Breakdown"
-    },
-    "Tiếng Việt": {
-        "Mega Express Train": "🚆 Tàu Tốc Hành",
-        "T10 Grind": "🪖 Cày T10",
-        "Players in Queue": "Số người đang xếp hàng",
-        "Cabin": "Toa",
-        "Chance": "Tỷ lệ vào",
-        "EV": "Giá trị kỳ vọng (EV)",
-        "EV Explanation": "EV ước lượng lợi ích trung bình theo thời gian. EV càng cao càng có lợi về lâu dài.",
-        "Total Resources Needed": "💰 Tổng Tài Nguyên Cần",
-        "Research Cost Breakdown": "📘 Chi Tiết Nghiên Cứu"
-    },
-    "繁體中文": {
-        "Mega Express Train": "🚆 特快列車",
-        "T10 Grind": "🪖 T10 升級",
-        "Players in Queue": "排隊人數",
-        "Cabin": "車廂",
-        "Chance": "進入機率",
-        "EV": "期望值 (EV)",
-        "EV Explanation": "什麼是 EV？EV 估算你長期的平均收益。數值越高代表選擇越有利。",
-        "Total Resources Needed": "💰 所需總資源",
-        "Research Cost Breakdown": "📘 研究成本明細"
-    }
-}
-t = translations[language]
+# Tab Layout
+tab1, tab2 = st.tabs(["🚂 Mega Express Train", "🪖 T10 Grind"])
 
-# Tab layout
-tab1, tab2 = st.tabs([t["Mega Express Train"], t["T10 Grind"]])
-
-# ---- Mega Express Train Calculator ----
+# ------------- Mega Express Train (Original) -------------
 with tab1:
-    st.title(t["Mega Express Train"])
+    st.header("🚂 Mega Express Train")
+    num_players = st.number_input("How many players are in the queue?", min_value=0, value=0, step=1)
+    train_options = {
+        "Cabin A": 1.0,
+        "Cabin B": 0.8,
+        "Cabin C": 0.6,
+        "Cabin D": 0.4,
+    }
 
-    players = st.number_input(t["Players in Queue"], min_value=0, step=1)
+    if num_players == 0:
+        st.write("Cabin A — (Please select number of players in the queue)")
+    else:
+        st.subheader("📊 Cabin Rankings by EV")
+        st.markdown(
+            "What is EV? Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice."
+        )
+        ev_results = {k: round(v / (num_players + 1), 4) for k, v in train_options.items()}
+        sorted_cabins = sorted(ev_results.items(), key=lambda x: x[1], reverse=True)
 
-    st.markdown("## 📊 Cabin Rankings by EV")
-    st.caption(t["EV Explanation"])
+        for cabin, ev in sorted_cabins:
+            st.write(f"{cabin} — EV: {ev}")
 
-    data = []
-    for cabin, slots in zip(["A", "B", "C"], [1, 2, 3]):
-        chance = f"{min(100, round(slots / players * 100, 1))}%" if players else f"({t['Players in Queue']})"
-        ev = round(slots / players, 3) if players else "-"
-        data.append((f"{t['Cabin']} {cabin}", chance, ev))
-
-    df = pd.DataFrame(data, columns=[t["Cabin"], t["Chance"], t["EV"]])
-    st.dataframe(df, use_container_width=True)
-
-# ---- T10 Grind Calculator ----
+# ------------- T10 Grind Calculator -------------
 with tab2:
-    st.title(t["T10 Grind"])
+    st.header("🪖 T10 Grind")
+    st.markdown("Select your current level for each tech branch:")
 
     tech_tree = {
         "Advanced Protection": 10,
@@ -79,98 +53,93 @@ with tab2:
         "Unit X": 1
     }
 
-    st.markdown("## 🧪 Select Current Research Levels")
+    # Full cost data
+    cost_data = {
+        "Advanced Protection": [
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
+        ],
+        "HP Boost": [
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
+        ],
+        "Attack Boost": [
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
+        ],
+        "Defense Boost": [
+            (31_000_000, 31_000_000, 91_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (53_000_000, 53_000_000, 158_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (74_000_000, 74_000_000, 221_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (96_000_000, 96_000_000, 287_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (134_000_000, 134_000_000, 403_000_000),
+            (175_000_000, 175_000_000, 522_000_000),
+        ],
+        "Unit X": [
+            (187_000_000, 187_000_000, 560_000_000),
+        ],
+    }
 
     levels = {}
     for tech, max_level in tech_tree.items():
         label = f"{tech} Current Level"
-        options = [i for i in range(0, max_level + 1)]
-        if max_level == 1:
-            options = [0, 1]
-            format_func = lambda x: "Max" if x == 1 else "0"
-        else:
-            format_func = lambda x, max_level=max_level: f"{x} (Max)" if x == max_level else str(x)
+        options = list(range(0, max_level + 1))
+        format_func = lambda x: f"{x} (Max)" if x == max_level else str(x)
+        levels[tech] = st.selectbox(label, options, index=0, format_func=format_func, key=tech)
 
-        levels[tech] = st.selectbox(label, options, index=0, format_func=lambda x, m=max_level: f"{x} (Max)" if x == m else str(x), key=tech)
-
-    # Cost Data
-    rows = [
-        ("Advanced Protection", [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ]),
-        ("HP Boost", [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ]),
-        ("Attack Boost", [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ]),
-        ("Defense Boost", [
-            (31e6, 31e6, 91e6),
-            (53e6, 53e6, 158e6),
-            (53e6, 53e6, 158e6),
-            (74e6, 74e6, 221e6),
-            (74e6, 74e6, 221e6),
-            (96e6, 96e6, 287e6),
-            (96e6, 96e6, 287e6),
-            (134e6, 134e6, 403e6),
-            (134e6, 134e6, 403e6),
-            (175e6, 175e6, 522e6),
-        ]),
-        ("Unit X", [
-            (187e6, 187e6, 560e6),
-        ]),
-    ]
-
+    # Calculate remaining research cost
     total_iron = total_bread = total_gold = 0
-    for tech, values in rows:
-        current = levels[tech]
-        for cost in values[current:]:
-            iron, bread, gold = cost
+    rows = []
+
+    for tech, current_level in levels.items():
+        for lvl in range(current_level, len(cost_data[tech])):
+            iron, bread, gold = cost_data[tech][lvl]
             total_iron += iron
             total_bread += bread
             total_gold += gold
+            rows.append({
+                "Research": f"{tech} {lvl + 1}",
+                "Iron": format_number(iron),
+                "Bread": format_number(bread),
+                "Gold": format_number(gold),
+            })
 
-    def fmt(val):
-        return f"{val/1e9:.1f}G" if val >= 1e9 else f"{val/1e6:.1f}M"
+    st.subheader("📦 Total Resources Needed")
+    st.write(f"**Iron:** {format_number(total_iron)}")
+    st.write(f"**Bread:** {format_number(total_bread)}")
+    st.write(f"**Gold:** {format_number(total_gold)}")
 
-    st.markdown(f"### {t['Total Resources Needed']}")
-    st.write(f"Iron: **{fmt(total_iron)}**")
-    st.write(f"Bread: **{fmt(total_bread)}**")
-    st.write(f"Gold: **{fmt(total_gold)}**")
-
-    # Show full research table
-    st.markdown(f"### {t['Research Cost Breakdown']}")
-    flat_rows = []
-    for tech, values in rows:
-        for i, (iron, bread, gold) in enumerate(values, start=1):
-            flat_rows.append((f"{tech} {i}", fmt(iron), fmt(bread), fmt(gold)))
-
-    df2 = pd.DataFrame(flat_rows, columns=["Research", "Iron", "Bread", "Gold"])
-    st.dataframe(df2, use_container_width=True)
+    st.subheader("📊 Research Cost Breakdown")
+    if rows:
+        df = pd.DataFrame(rows)
+        st.dataframe(df, use_container_width=True)
+    else:
+        st.write("🎉 All research complete!")
