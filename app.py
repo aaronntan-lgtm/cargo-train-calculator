@@ -60,6 +60,16 @@ text = {
         "vi": "📊 Xếp hạng các khoang theo EV",
         "zh": "📊 根據 EV 排名的車廂"
     },
+    "no_input_msg": {
+        "en": "(Please input number of passengers in queue)",
+        "vi": "(Vui lòng nhập số người xếp hàng)",
+        "zh": "（請輸入排隊人數）"
+    },
+    "full_entry_msg": {
+        "en": "100% chance of entry",
+        "vi": "100% được vào",
+        "zh": "100% 可進入"
+    }
 }
 
 # --- Cabin name mappings ---
@@ -109,8 +119,12 @@ ev_list.sort(key=lambda x: -x[1])
 st.subheader(text["ranking_header"][lang])
 for rank, (name, ev) in enumerate(ev_list, start=1):
     label = cabin_names.get(name, f"Cabin {name}")
-    if ev == float('inf'):
-        st.markdown(f"**{rank}. {label} — 100% chance of entry**")
+    queue = cabins[name]['queue']
+    
+    if queue == 0:
+        st.markdown(f"**{rank}. {label} — {text['no_input_msg'][lang]}**")
+    elif ev == float('inf'):
+        st.markdown(f"**{rank}. {label} — {text['full_entry_msg'][lang]}**")
     else:
         st.markdown(f"**{rank}. {label} — EV = {ev:.2f}**")
 
