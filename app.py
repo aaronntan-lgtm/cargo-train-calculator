@@ -3,9 +3,9 @@ import streamlit as st
 # Set up the page title and layout
 st.set_page_config(page_title="Last War Calculators", layout="centered")
 
-# Tabs setup
-tabs = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
-selected_tab = st.radio("Select Calculator", tabs)
+# Create tabs
+tab_titles = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
+selected_tab = st.selectbox("Select Calculator", tab_titles)
 
 # Arms Race Calculator (Placeholder)
 if selected_tab == 'Arms Race Calculator':
@@ -79,12 +79,12 @@ elif selected_tab == 'Train Calculator':
     st.title(text["title"][lang])
     st.markdown(text["intro"][lang])
 
-    # Input section
+    # Input section with default values set to 0
     st.subheader(text["input_header"][lang])
-    queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=11)
-    queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=9)
-    queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=13)
-    queue_d = st.number_input(text["input_label"][lang].format(name="D"), min_value=0, value=22)
+    queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=0)
+    queue_b = st.number_input(text["input_label"][lang].format(name="B"), min_value=0, value=0)
+    queue_c = st.number_input(text["input_label"][lang].format(name="C"), min_value=0, value=0)
+    queue_d = st.number_input(text["input_label"][lang].format(name="D"), min_value=0, value=0)
 
     # Cabin values
     cabins = {
@@ -114,7 +114,7 @@ elif selected_tab == 'Train Calculator':
     st.subheader(text["ranking_header"][lang])
     for rank, (name, ev) in enumerate(ev_list, start=1):
         if ev == float('inf'):
-            st.markdown(f"**{rank}. Cabin {name} — 100% chance of entry**")
+            st.markdown(f"**{rank}. Cabin {name} — Please input number of passengers currently in the queue**")
         else:
             st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}")
 
