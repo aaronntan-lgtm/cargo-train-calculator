@@ -64,7 +64,33 @@ text = {
         "vi": "Chọn cấp độ nghiên cứu hiện tại",
         "zh": "选择当前研究等级"
     },
+    "resource_total_header": {
+        "en": "### Total Research Cost Remaining:",
+        "vi": "### Tổng chi phí nghiên cứu còn lại:",
+        "zh": "### 剩余研究总成本："
+    },
+    "resource_labels": {
+        "en": ["Iron", "Bread", "Gold"],
+        "vi": ["Sắt", "Bánh mì", "Vàng"],
+        "zh": ["铁", "面包", "金币"]
+    },
+    "cabins_no_input": {
+        "en": "(Please select number of players in the queue)",
+        "vi": "(Vui lòng chọn số người trong hàng đợi)",
+        "zh": "(请选择排队人数)"
+    }
 }
+
+def format_number(num):
+    """Format number with M or G suffix"""
+    if num >= 1_000:
+        # Billions
+        return f"{num/1_000:.1f}G"
+    elif num >= 1:
+        # Millions
+        return f"{num:.1f}M"
+    else:
+        return str(num)
 
 # Main app tabs
 tabs = [
@@ -110,7 +136,7 @@ with selected_tab[0]:
 
     for rank, (name, ev) in enumerate(ev_list, start=1):
         if ev is None:
-            st.markdown(f"**{rank}. Cabin {name} — (Please select number of players in the queue)**")
+            st.markdown(f"**{rank}. Cabin {name} — {text['cabins_no_input'][lang]}**")
         else:
             st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
 
@@ -133,11 +159,35 @@ with selected_tab[1]:
 
     unit_x_levels = ["0", "1 (Max)"]
 
-    adv_prot = st.selectbox("Advanced Protection Level", adv_prot_levels, index=0)
-    hp_boost = st.selectbox("HP Boost III Level", hp_boost_levels, index=0)
-    atk_boost = st.selectbox("Attack Boost III Level", atk_boost_levels, index=0)
-    def_boost = st.selectbox("Defense Boost III Level", def_boost_levels, index=0)
-    unit_x = st.selectbox("Unit X Level", unit_x_levels, index=0)
+    adv_prot = st.selectbox({
+        "en": "Advanced Protection Level",
+        "vi": "Cấp độ Bảo vệ nâng cao",
+        "zh": "高级保护等级"
+    }[lang], adv_prot_levels, index=0)
+
+    hp_boost = st.selectbox({
+        "en": "HP Boost III Level",
+        "vi": "Cấp độ Tăng HP III",
+        "zh": "生命提升 III 等级"
+    }[lang], hp_boost_levels, index=0)
+
+    atk_boost = st.selectbox({
+        "en": "Attack Boost III Level",
+        "vi": "Cấp độ Tăng Công III",
+        "zh": "攻击提升 III 等级"
+    }[lang], atk_boost_levels, index=0)
+
+    def_boost = st.selectbox({
+        "en": "Defense Boost III Level",
+        "vi": "Cấp độ Tăng Phòng III",
+        "zh": "防御提升 III 等级"
+    }[lang], def_boost_levels, index=0)
+
+    unit_x = st.selectbox({
+        "en": "Unit X Level",
+        "vi": "Cấp độ Unit X",
+        "zh": "单位 X 等级"
+    }[lang], unit_x_levels, index=0)
 
     def parse_level(level_str):
         return int(level_str.split()[0])
@@ -148,39 +198,27 @@ with selected_tab[1]:
     def_boost_level = parse_level(def_boost)
     unit_x_level = parse_level(unit_x)
 
-    # Define research costs per level
-    research_costs = {
-        "Advanced Protection": [0, 175, 175, 175, 175, 175, 175, 175, 175, 175, 175],
-        "HP Boost III": [0, 0, 175, 175, 175, 175, 175, 175, 175, 175, 175],
-        "Attack Boost III": [0, 0, 96, 134, 134, 175, 175, 175, 175, 175, 175],
-        "Defense Boost III": [0, 0, 96, 134, 134, 175, 175, 175, 175, 175, 175],
-        "Unit X": [0, 560],
-    }
-
-    # For simplicity, use provided original table costs from your earlier message:
-    # Actually, I will use your exact cost data you gave earlier:
-    # Let's just hardcode the costs from your data:
-
-    # Correct costs from your table (adjusted for index starting at 1 or 0 accordingly)
+    # Costs converted to millions (original / 1,000,000)
     iron_costs = {
-        "Advanced Protection": [0, 175, 175, 175, 175, 175, 175, 175, 175, 175, 175],
-        "HP Boost III": [0, 96, 96, 96, 96, 96, 96, 96, 96, 96, 96],
-        "Attack Boost III": [0, 96, 134, 134, 134, 175, 175, 175, 175, 175, 175],
-        "Defense Boost III": [0, 96, 96, 134, 134, 175, 175, 175, 175, 175, 175],
-        "Unit X": [0, 187]
+        "Advanced Protection": [0, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175],
+        "HP Boost III": [0, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096, 0.096],
+        "Attack Boost III": [0, 0.096, 0.134, 0.134, 0.134, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175],
+        "Defense Boost III": [0, 0.096, 0.096, 0.134, 0.134, 0.175, 0.175, 0.175, 0.175, 0.175, 0.175],
+        "Unit X": [0, 0.187]
     }
     bread_costs = iron_costs  # same as iron
     gold_costs = {
-        "Advanced Protection": [0, 522, 522, 522, 522, 522, 522, 522, 522, 522, 522],
-        "HP Boost III": [0, 287, 287, 287, 287, 287, 287, 287, 287, 287, 287],
-        "Attack Boost III": [0, 287, 403, 403, 403, 522, 522, 522, 522, 522, 522],
-        "Defense Boost III": [0, 287, 287, 403, 403, 522, 522, 522, 522, 522, 522],
-        "Unit X": [0, 560]
+        "Advanced Protection": [0, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522],
+        "HP Boost III": [0, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287, 0.287],
+        "Attack Boost III": [0, 0.287, 0.403, 0.403, 0.403, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522],
+        "Defense Boost III": [0, 0.287, 0.287, 0.403, 0.403, 0.522, 0.522, 0.522, 0.522, 0.522, 0.522],
+        "Unit X": [0, 0.560]
     }
 
-    # Helper to sum remaining cost from current level to max
     def sum_remaining(cost_list, current_level):
-        return sum(cost_list[current_level + 1:])
+        # current_level is 0-based index for costs list
+        # sum from next level to end
+        return sum(cost_list[current_level + 1 :])
 
     iron_total = (
         sum_remaining(iron_costs["Advanced Protection"], adv_prot_level)
@@ -206,7 +244,9 @@ with selected_tab[1]:
         + sum_remaining(gold_costs["Unit X"], unit_x_level)
     )
 
-    st.markdown("### Total Research Cost Remaining:")
-    st.write(f"- Iron: {iron_total}")
-    st.write(f"- Bread: {bread_total}")
-    st.write(f"- Gold: {gold_total}")
+    st.markdown(text["resource_total_header"][lang])
+    resource_labels = text["resource_labels"][lang]
+
+    st.write(f"- {resource_labels[0]}: {format_number(iron_total)}")
+    st.write(f"- {resource_labels[1]}: {format_number(bread_total)}")
+    st.write(f"- {resource_labels[2]}: {format_number(gold_total)}")
