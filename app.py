@@ -1,8 +1,9 @@
 import streamlit as st
+import pandas as pd
 
-st.set_page_config(page_title="Best Cargo Train Calculator")
+st.set_page_config(page_title="Last War Calculators", layout="centered")
 
-# Move language selector to the top
+# Language selection at the top
 languages = {
     "English": "en",
     "Tiếng Việt": "vi",
@@ -11,60 +12,61 @@ languages = {
 lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
 lang = languages[lang_choice]
 
-# Custom CSS for green dropdown styling
-st.markdown("""
-    <style>
-    div[data-baseweb="select"] > div {
-        border-color: #28a745 !important;
-        box-shadow: 0 0 0 1px #28a745 !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Localized content
+# Translations
 text = {
-    "title_train": {
+    "train_title": {
         "en": "🚂 Mega Express Train",
         "vi": "🚂 Tàu cao tốc Mega",
-        "zh": "🚂 超級特快列車"
+        "zh": "🚂 超級快車"
     },
-    "title_t10": {
+    "train_intro": {
+        "en": "Choose your best cabin based on current queue. Cabin D is best, A second, B and C equal.",
+        "vi": "Chọn khoang tốt nhất dựa trên hàng chờ. Khoang D tốt nhất, sau đó là A, B và C bằng nhau.",
+        "zh": "根據排隊人數選擇最佳車廂。D 最佳，其次 A，B 與 C 相同。"
+    },
+    "input_header": {
+        "en": "📥 Enter Queue for Each Cabin",
+        "vi": "📥 Nhập hàng chờ cho mỗi khoang",
+        "zh": "📥 輸入每個車廂的排隊人數"
+    },
+    "input_label": {
+        "en": "Cabin {name} (passengers in queue)",
+        "vi": "Khoang {name} (số người đang chờ)",
+        "zh": "車廂 {name}（排隊人數）"
+    },
+    "ranking_header": {
+        "en": "📊 Cabin Rankings by EV",
+        "vi": "📊 Xếp hạng khoang theo EV",
+        "zh": "📊 車廂 EV 排名"
+    },
+    "ev_note": {
+        "en": "What is EV? Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice.",
+        "vi": "EV là gì? Giá trị kỳ vọng (EV) là mức lợi nhuận trung bình theo thời gian. EV càng cao càng tốt.",
+        "zh": "什麼是 EV？期望值表示長期平均收益。EV 越高，越好。"
+    },
+    "t10_title": {
         "en": "🪖 T10 Grind",
         "vi": "🪖 Cày T10",
         "zh": "🪖 T10 升級"
     },
-    "ev_description": {
-        "en": "**What is EV?** Expected Value (EV) estimates your average gain over time. A higher EV means a better long-term choice.",
-        "vi": "**EV là gì?** Giá trị kỳ vọng (EV) ước tính mức lợi trung bình của bạn theo thời gian. EV càng cao thì lựa chọn càng tốt về lâu dài.",
-        "zh": "**什麼是 EV？** 期望值 (EV) 表示你長期平均能獲得的收益。EV 越高，長期表現越好。"
+    "t10_header": {
+        "en": "🧮 Select Your Current Research Levels",
+        "vi": "🧮 Chọn cấp độ nghiên cứu hiện tại",
+        "zh": "🧮 選擇目前研究等級"
     },
-    "input_header": {
-        "en": "📥 Input Queue Sizes for Each Cabin",
-        "vi": "📥 Nhập số người đang xếp hàng tại mỗi khoang",
-        "zh": "📥 輸入每個車廂的排隊人數"
-    },
-    "input_label": {
-        "en": "Cabin {name} (Enter the number of passengers in the queue here)",
-        "vi": "Khoang {name} (Nhập số người xếp hàng tại đây)",
-        "zh": "車廂 {name}（請輸入排隊人數）"
-    },
-    "ranking_header": {
-        "en": "📊 Cabin Rankings by EV",
-        "vi": "📊 Xếp hạng các khoang theo EV",
-        "zh": "📊 根據 EV 排名的車廂"
-    },
-    "resources_header": {
-        "en": "📦 Resources needed for T10",
+    "t10_table_header": {
+        "en": "📦 Resources Needed for T10",
         "vi": "📦 Tài nguyên cần thiết cho T10",
         "zh": "📦 T10 所需資源"
     }
 }
 
-tab1, tab2 = st.tabs([text["title_train"][lang], text["title_t10"][lang]])
+tab1, tab2 = st.tabs([text["train_title"][lang], text["t10_title"][lang]])
 
+# --------------------- Mega Express Train Calculator ---------------------
 with tab1:
-    st.title(text["title_train"][lang])
-    st.markdown(text["ev_description"][lang])
+    st.title(text["train_title"][lang])
+    st.markdown(text["train_intro"][lang])
     st.subheader(text["input_header"][lang])
 
     queue_a = st.number_input(text["input_label"][lang].format(name="A"), min_value=0, value=0)
@@ -92,23 +94,29 @@ with tab1:
     ev_list.sort(key=lambda x: -x[1])
 
     st.subheader(text["ranking_header"][lang])
+    st.markdown(text["ev_note"][lang])
+
     for rank, (name, ev) in enumerate(ev_list, start=1):
-        if ev == float('inf'):
+        if cabins[name]['queue'] == 0:
             st.markdown(f"**{rank}. Cabin {name} — (Please select number of players in the queue)**")
         else:
             st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
 
+# --------------------- T10 Calculator ---------------------
 with tab2:
-    st.title(text["title_t10"][lang])
+    st.title(text["t10_title"][lang])
+    st.subheader(text["t10_header"][lang])
 
-    def format_number(n):
+    def format_large_number(n):
         if n >= 1_000_000_000:
             return f"{n / 1_000_000_000:.1f}G"
         elif n >= 1_000_000:
             return f"{n / 1_000_000:.1f}M"
-        return str(n)
+        else:
+            return str(n)
 
-    research_data = {
+    # Full cost table
+    t10_data = {
         "Advanced Protection": [
             (31_000_000, 31_000_000, 91_000_000),
             (53_000_000, 53_000_000, 158_000_000),
@@ -161,29 +169,24 @@ with tab2:
     }
 
     levels = {}
-    for name, steps in research_data.items():
-        max_level = len(steps)
-        label = name
-        levels[name] = st.selectbox(
-            label,
-            list(range(0, max_level + 1)),
+    for tech in ["Advanced Protection", "HP Boost", "Attack Boost", "Defense Boost"]:
+        levels[tech] = st.selectbox(
+            tech,
+            list(range(0, 11)),
             index=0,
-            format_func=lambda x: "Max" if x == max_level else str(x)
+            format_func=lambda x: "Max" if x == 10 else x
         )
+    levels["Unit X"] = st.selectbox("Unit X", [0, 1], index=0, format_func=lambda x: "Max" if x == 1 else x)
 
-    total_iron = 0
-    total_bread = 0
-    total_gold = 0
-
-    for name, level in levels.items():
-        steps = research_data[name]
+    total_iron = total_bread = total_gold = 0
+    for tech, level in levels.items():
         for i in range(level):
-            iron, bread, gold = steps[i]
+            iron, bread, gold = t10_data[tech][i]
             total_iron += iron
             total_bread += bread
             total_gold += gold
 
-    st.markdown("### " + text["resources_header"][lang])
-    st.markdown(f"- **Iron**: {format_number(total_iron)}")
-    st.markdown(f"- **Bread**: {format_number(total_bread)}")
-    st.markdown(f"- **Gold**: {format_number(total_gold)}")
+    st.subheader(text["t10_table_header"][lang])
+    st.markdown(f"**Iron**: {format_large_number(total_iron)}")
+    st.markdown(f"**Bread**: {format_large_number(total_bread)}")
+    st.markdown(f"**Gold**: {format_large_number(total_gold)}")
