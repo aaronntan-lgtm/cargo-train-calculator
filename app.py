@@ -1,49 +1,55 @@
 import streamlit as st
 
-# Set up the page title and layout
-st.set_page_config(page_title="Last War Calculators", layout="centered")
-
-# Create a container for the tabs with custom HTML and CSS
-tabs = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
-
-# Custom CSS for tabs (Excel-style tabs layout)
-tab_css = """
+# Set up the page title and layout in dark mode
+st.set_page_config(page_title="Last War Calculators", layout="centered", page_icon="🚂")
+st.markdown(
+    """
     <style>
+    /* Enable dark mode */
+    .css-1d391kg {background-color: #181818; color: #fff;}
+    .css-18e3t3k {background-color: #181818; color: #fff;}
+    .stButton>button {background-color: #4CAF50; color: white;}
+    .stRadio>label, .stSelectbox>label, .stNumberInput>label, .stMarkdown {color: white;}
+
+    /* Custom tab styles for horizontal tabs */
     .tabs {
         display: flex;
         cursor: pointer;
-        background-color: #f1f1f1;
-        border: 1px solid #ccc;
+        background-color: #333;
+        border: 1px solid #444;
         margin-bottom: 1rem;
         font-weight: bold;
     }
     .tabs div {
-        padding: 10px 20px;
+        padding: 12px 20px;
         text-align: center;
-        border-right: 1px solid #ccc;
+        border-right: 1px solid #444;
         flex: 1;
+        color: #bbb;
         transition: background-color 0.3s ease;
+        cursor: pointer;
     }
     .tabs div:last-child {
         border-right: none;
     }
     .tabs div:hover {
-        background-color: #e2e2e2;
+        background-color: #444;
     }
     .tabs div.active {
         background-color: #4CAF50;
         color: white;
     }
     </style>
-"""
+    """, unsafe_allow_html=True
+)
 
-# Inject the custom CSS into the Streamlit app
-st.markdown(tab_css, unsafe_allow_html=True)
+# List of tabs
+tabs = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
 
-# Create the tab navigation
-selected_tab = st.radio("Select Calculator", tabs, index=0)
+# Display tabs horizontally across
+selected_tab = st.radio("Select Calculator", tabs, index=0, horizontal=True)
 
-# Create the content for each tab
+# Function to display content for the selected tab
 def display_tabs(selected_tab):
     if selected_tab == 'Arms Race Calculator':
         st.title("Arms Race Calculator")
