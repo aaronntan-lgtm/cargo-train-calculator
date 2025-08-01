@@ -22,7 +22,6 @@ languages = {
 lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
 lang = languages[lang_choice]
 
-# Localized content
 text = {
     "train_title": {
         "en": "🚂 Mega Express Train",
@@ -84,10 +83,8 @@ text = {
 def format_number(num):
     """Format number with M or G suffix"""
     if num >= 1000:
-        # Billions
         return f"{num/1000:.1f}G"
     elif num >= 1:
-        # Millions
         return f"{num:.1f}M"
     else:
         return str(num)
@@ -120,7 +117,7 @@ with selected_tab[0]:
 
     def calculate_ev(queue_size, cabin_value):
         if queue_size == 0:
-            return None  # None to indicate no input yet
+            return None
         return (5 / queue_size) * cabin_value
 
     ev_list = []
@@ -145,19 +142,14 @@ with selected_tab[1]:
     st.title(text["t10_title"][lang])
     st.subheader(text["t10_header"][lang])
 
-    # Levels for dropdowns - all start at 0 except Advanced Protection now starts at 0
     adv_prot_levels = [str(i) for i in range(0, 11)]
     adv_prot_levels[-1] = "10 (Max)"
-
     hp_boost_levels = [str(i) for i in range(0, 11)]
     hp_boost_levels[-1] = "10 (Max)"
-
     atk_boost_levels = [str(i) for i in range(0, 11)]
     atk_boost_levels[-1] = "10 (Max)"
-
     def_boost_levels = [str(i) for i in range(0, 11)]
     def_boost_levels[-1] = "10 (Max)"
-
     unit_x_levels = ["0", "1 (Max)"]
 
     adv_prot = st.selectbox({
@@ -199,26 +191,25 @@ with selected_tab[1]:
     def_boost_level = parse_level(def_boost)
     unit_x_level = parse_level(unit_x)
 
-    # Original raw costs (no longer divided by 1,000,000 here)
+    # Values as per your table (units in raw integers)
     iron_costs_raw = {
-        "Advanced Protection": [0, 175, 175, 175, 175, 175, 175, 175, 175, 175, 175],
-        "HP Boost III": [0, 96, 96, 96, 96, 96, 96, 96, 96, 96, 96],
-        "Attack Boost III": [0, 96, 134, 134, 134, 175, 175, 175, 175, 175, 175],
-        "Defense Boost III": [0, 96, 96, 134, 134, 175, 175, 175, 175, 175, 175],
-        "Unit X": [0, 187]
+        "Advanced Protection": [0] + [175_000_000]*10,
+        "HP Boost III": [0] + [96_000_000]*10,
+        "Attack Boost III": [0, 96_000_000, 134_000_000, 134_000_000, 134_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000],
+        "Defense Boost III": [0, 96_000_000, 96_000_000, 134_000_000, 134_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000, 175_000_000],
+        "Unit X": [0, 187_000_000]
     }
-    bread_costs_raw = iron_costs_raw  # same as iron
+    bread_costs_raw = iron_costs_raw.copy()  # same as iron
     gold_costs_raw = {
-        "Advanced Protection": [0, 522, 522, 522, 522, 522, 522, 522, 522, 522, 522],
-        "HP Boost III": [0, 287, 287, 287, 287, 287, 287, 287, 287, 287, 287],
-        "Attack Boost III": [0, 287, 403, 403, 403, 522, 522, 522, 522, 522, 522],
-        "Defense Boost III": [0, 287, 287, 403, 403, 522, 522, 522, 522, 522, 522],
-        "Unit X": [0, 560]
+        "Advanced Protection": [0] + [522_000_000]*10,
+        "HP Boost III": [0] + [287_000_000]*10,
+        "Attack Boost III": [0, 287_000_000, 403_000_000, 403_000_000, 403_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000],
+        "Defense Boost III": [0, 287_000_000, 287_000_000, 403_000_000, 403_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000, 522_000_000],
+        "Unit X": [0, 560_000_000]
     }
 
     def sum_remaining(cost_list, current_level):
-        # sum from next level to end
-        return sum(cost_list[current_level + 1:])
+        return sum(cost_list[current_level+1:])
 
     iron_total_raw = (
         sum_remaining(iron_costs_raw["Advanced Protection"], adv_prot_level)
@@ -228,13 +219,7 @@ with selected_tab[1]:
         + sum_remaining(iron_costs_raw["Unit X"], unit_x_level)
     )
 
-    bread_total_raw = (
-        sum_remaining(bread_costs_raw["Advanced Protection"], adv_prot_level)
-        + sum_remaining(bread_costs_raw["HP Boost III"], hp_boost_level)
-        + sum_remaining(bread_costs_raw["Attack Boost III"], atk_boost_level)
-        + sum_remaining(bread_costs_raw["Defense Boost III"], def_boost_level)
-        + sum_remaining(bread_costs_raw["Unit X"], unit_x_level)
-    )
+    bread_total_raw = iron_total_raw  # same values
 
     gold_total_raw = (
         sum_remaining(gold_costs_raw["Advanced Protection"], adv_prot_level)
@@ -244,7 +229,6 @@ with selected_tab[1]:
         + sum_remaining(gold_costs_raw["Unit X"], unit_x_level)
     )
 
-    # Convert raw totals to millions for display
     iron_total = iron_total_raw / 1_000_000
     bread_total = bread_total_raw / 1_000_000
     gold_total = gold_total_raw / 1_000_000
