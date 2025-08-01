@@ -2,11 +2,16 @@ import streamlit as st
 
 st.set_page_config(page_title="Best Cargo Train Calculator")
 
-# Custom CSS for green dropdown styling
+# ✅ Custom CSS for green styling only on the language dropdown
 st.markdown("""
     <style>
-    div[data-baseweb="select"] > div {
-        border-color: #28a745 !important;
+    div[data-testid="stSelectbox"][id^="language_selector"] > div {
+        border: 1px solid #28a745 !important;
+        box-shadow: 0 0 0 1px #28a745 !important;
+    }
+    div[data-testid="stSelectbox"][id^="language_selector"] > div:focus, 
+    div[data-testid="stSelectbox"][id^="language_selector"] > div:focus-within {
+        border: 1px solid #28a745 !important;
         box-shadow: 0 0 0 1px #28a745 !important;
     }
     </style>
@@ -19,7 +24,12 @@ languages = {
     "繁體中文": "zh"
 }
 
-lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
+# ✅ Add unique key to match styling
+lang_choice = st.selectbox(
+    "🌐 Select Language / Chọn ngôn ngữ / 選擇語言",
+    list(languages.keys()),
+    key="language_selector"
+)
 lang = languages[lang_choice]
 
 # Localized content
@@ -99,6 +109,6 @@ for rank, (name, ev) in enumerate(ev_list, start=1):
     else:
         st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
 
-# EV explanation moved below rankings
+# EV explanation
 st.markdown("---")
 st.markdown(text["ev_description"][lang])
