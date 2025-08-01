@@ -1,7 +1,7 @@
 import streamlit as st
 
-# Enable dark mode by default
-st.set_page_config(page_title="Last War Calculators", layout="centered", page_icon="🚂", theme="dark")
+# Set up the page title and layout (no theme argument since dark mode is handled via config.toml or system)
+st.set_page_config(page_title="Last War Calculators", layout="centered", page_icon="🚂")
 
 # Create a container for the tabs with custom CSS
 tabs = ['Arms Race Calculator', 'T10 Calculator', 'Train Calculator']
