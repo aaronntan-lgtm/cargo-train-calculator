@@ -93,14 +93,15 @@ ev_list.sort(key=lambda x: -x[1])
 
 # Ranking section
 st.subheader(text["ranking_header"][lang])
+
+# EV explanation placed just below header and above results
+st.markdown(text["ev_description"][lang])
+
 for rank, (name, ev) in enumerate(ev_list, start=1):
     if cabins[name]['queue'] == 0:
         st.markdown(f"**{rank}. Cabin {name} — (Please select number of players in the queue)**")
     else:
         st.markdown(f"**{rank}. Cabin {name} — EV = {ev:.2f}**")
 
-# EV explanation moved below rankings
-st.markdown("---")
-st.markdown(text["ev_description"][lang])
 
 
